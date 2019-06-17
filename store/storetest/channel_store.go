@@ -610,7 +610,7 @@ func testChannelStoreDelete(t *testing.T, ss store.Store) {
 	m2.NotifyProps = model.GetDefaultChannelNotifyProps()
 	store.Must(ss.Channel().SaveMember(&m2))
 
-	if err := ss.Channel().Delete(o1.Id, model.GetMillis()); err != nil {
+	if err = ss.Channel().Delete(o1.Id, model.GetMillis()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -618,7 +618,7 @@ func testChannelStoreDelete(t *testing.T, ss store.Store) {
 		t.Fatal("should have been deleted")
 	}
 
-	if err := ss.Channel().Delete(o3.Id, model.GetMillis()); err != nil {
+	if err = ss.Channel().Delete(o3.Id, model.GetMillis()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -630,9 +630,8 @@ func testChannelStoreDelete(t *testing.T, ss store.Store) {
 		t.Fatal("invalid number of channels")
 	}
 
-	cresult = <-ss.Channel().GetMoreChannels(o1.TeamId, m1.UserId, 0, 100)
-	require.Nil(t, cresult.Err)
-	list = cresult.Data.(*model.ChannelList)
+	list, err = ss.Channel().GetMoreChannels(o1.TeamId, m1.UserId, 0, 100)
+	require.Nil(t, err)
 
 	if len(*list) != 1 {
 		t.Fatal("invalid number of channels")
@@ -717,9 +716,9 @@ func testChannelStoreGetByNames(t *testing.T, ss store.Store) {
 		{"", []string{o1.Name, "foo", o2.Name, o2.Name}, []string{o1.Id, o2.Id}},
 		{"asd", []string{o1.Name, "foo", o2.Name, o2.Name}, nil},
 	} {
-		r := <-ss.Channel().GetByNames(tc.TeamId, tc.Names, true)
-		require.Nil(t, r.Err)
-		channels := r.Data.([]*model.Channel)
+		var channels []*model.Channel
+		channels, err = ss.Channel().GetByNames(tc.TeamId, tc.Names, true)
+		require.Nil(t, err)
 		var ids []string
 		for _, channel := range channels {
 			ids = append(ids, channel.Id)
@@ -735,9 +734,8 @@ func testChannelStoreGetByNames(t *testing.T, ss store.Store) {
 	err = ss.Channel().Delete(o2.Id, model.GetMillis())
 	require.Nil(t, err, "channel should have been deleted")
 
-	r := <-ss.Channel().GetByNames(o1.TeamId, []string{o1.Name}, false)
-	require.Nil(t, r.Err)
-	channels := r.Data.([]*model.Channel)
+	channels, err := ss.Channel().GetByNames(o1.TeamId, []string{o1.Name}, false)
+	require.Nil(t, err)
 	assert.Len(t, channels, 0)
 }
 
@@ -1272,9 +1270,9 @@ func testChannelStoreGetMoreChannels(t *testing.T, ss store.Store) {
 	}))
 
 	t.Run("only o3 listed in more channels", func(t *testing.T) {
-		result := <-ss.Channel().GetMoreChannels(teamId, userId, 0, 100)
-		require.Nil(t, result.Err)
-		require.Equal(t, &model.ChannelList{&o3}, result.Data.(*model.ChannelList))
+		list, channelErr := ss.Channel().GetMoreChannels(teamId, userId, 0, 100)
+		require.Nil(t, channelErr)
+		require.Equal(t, &model.ChannelList{&o3}, list)
 	})
 
 	// o6 is another channel on the team to which the user does not belong, and would thus
@@ -1303,21 +1301,21 @@ func testChannelStoreGetMoreChannels(t *testing.T, ss store.Store) {
 	require.Nil(t, err, "channel should have been deleted")
 
 	t.Run("both o3 and o6 listed in more channels", func(t *testing.T) {
-		result := <-ss.Channel().GetMoreChannels(teamId, userId, 0, 100)
-		require.Nil(t, result.Err)
-		require.Equal(t, &model.ChannelList{&o3, &o6}, result.Data.(*model.ChannelList))
+		list, err := ss.Channel().GetMoreChannels(teamId, userId, 0, 100)
+		require.Nil(t, err)
+		require.Equal(t, &model.ChannelList{&o3, &o6}, list)
 	})
 
 	t.Run("only o3 listed in more channels with offset 0, limit 1", func(t *testing.T) {
-		result := <-ss.Channel().GetMoreChannels(teamId, userId, 0, 1)
-		require.Nil(t, result.Err)
-		require.Equal(t, &model.ChannelList{&o3}, result.Data.(*model.ChannelList))
+		list, err := ss.Channel().GetMoreChannels(teamId, userId, 0, 1)
+		require.Nil(t, err)
+		require.Equal(t, &model.ChannelList{&o3}, list)
 	})
 
 	t.Run("only o6 listed in more channels with offset 1, limit 1", func(t *testing.T) {
-		result := <-ss.Channel().GetMoreChannels(teamId, userId, 1, 1)
-		require.Nil(t, result.Err)
-		require.Equal(t, &model.ChannelList{&o6}, result.Data.(*model.ChannelList))
+		list, err := ss.Channel().GetMoreChannels(teamId, userId, 1, 1)
+		require.Nil(t, err)
+		require.Equal(t, &model.ChannelList{&o6}, list)
 	})
 
 	t.Run("verify analytics for open channels", func(t *testing.T) {
@@ -1541,8 +1539,7 @@ func testChannelStoreGetChannelCounts(t *testing.T, ss store.Store) {
 	m3.NotifyProps = model.GetDefaultChannelNotifyProps()
 	store.Must(ss.Channel().SaveMember(&m3))
 
-	cresult := <-ss.Channel().GetChannelCounts(o1.TeamId, m1.UserId)
-	counts := cresult.Data.(*model.ChannelCounts)
+	counts, _ := ss.Channel().GetChannelCounts(o1.TeamId, m1.UserId)
 
 	if len(counts.Counts) != 1 {
 		t.Fatal("wrong number of counts")
