@@ -137,7 +137,14 @@ func TestUserIsValid(t *testing.T) {
 	err = user.IsValid()
 	require.True(t, HasExpectedUserIsValidError(err, "username", user.Id), "expected user is valid error: %s", err.Error())
 
-	user.Username = NewId()
+	user.Username = "8aq7azbfyp8s9nbnmwziy9xk9r"
+	err = user.IsValid()
+	require.True(t, HasExpectedUserIsValidError(err, "username", user.Id), "expected user is valid error: %s", err.Error())
+
+	// Cannot use NewId() for Username because returns possible leading digit [A-Z0-9]
+	// sometime this will fail username, and other times fails email. fix by
+	// adding preceding 'a' character
+	user.Username = "a" + NewId()
 	err = user.IsValid()
 	require.True(t, HasExpectedUserIsValidError(err, "email", user.Id), "expected user is valid error: %s", err.Error())
 
@@ -263,9 +270,9 @@ var usernames = []struct {
 	{"spin-punch", true},
 	{"sp", true},
 	{"s", true},
-	{"1spin-punch", true},
-	{"-spin-punch", true},
-	{".spin-punch", true},
+	{"1spin-punch", false},
+	{"-spin-punch", false},
+	{".spin-punch", false},
 	{"Spin-punch", false},
 	{"spin punch-", false},
 	{"spin_punch", true},

@@ -1028,7 +1028,7 @@ func TestImportImportUser(t *testing.T) {
 		t.Fatalf("Failed to get channel from database.")
 	}
 
-	username = model.NewId()
+	username = "a" + model.NewId()
 	data = UserImportData{
 		Username:  &username,
 		Email:     ptrStr(model.NewId() + "@example.com"),
@@ -2760,7 +2760,7 @@ func TestImportPostAndRepliesWithAttachments(t *testing.T) {
 	}
 
 	// Create a user3.
-	username := model.NewId()
+	username := "a" + model.NewId()
 	th.App.ImportUser(&UserImportData{
 		Username: &username,
 		Email:    ptrStr(model.NewId() + "@example.com"),
@@ -2777,7 +2777,7 @@ func TestImportPostAndRepliesWithAttachments(t *testing.T) {
 	}, false)
 	user4, err := th.App.GetUserByUsername(username2)
 	if err != nil {
-		t.Fatalf("Failed to get user3 from database.")
+		t.Fatalf("Failed to get user4 from database.")
 	}
 
 	// Post with attachments.
@@ -2820,7 +2820,7 @@ func TestImportPostAndRepliesWithAttachments(t *testing.T) {
 
 	// Create direct post users.
 
-	username3 := model.NewId()
+	username3 := "a" + model.NewId()
 	th.App.ImportUser(&UserImportData{
 		Username: &username3,
 		Email:    ptrStr(model.NewId() + "@example.com"),
@@ -2830,7 +2830,7 @@ func TestImportPostAndRepliesWithAttachments(t *testing.T) {
 		t.Fatalf("Failed to get user3 from database.")
 	}
 
-	username4 := model.NewId()
+	username4 := "a" + model.NewId()
 	th.App.ImportUser(&UserImportData{
 		Username: &username4,
 		Email:    ptrStr(model.NewId() + "@example.com"),
@@ -2838,7 +2838,7 @@ func TestImportPostAndRepliesWithAttachments(t *testing.T) {
 
 	user4, err = th.App.GetUserByUsername(username4)
 	if err != nil {
-		t.Fatalf("Failed to get user3 from database.")
+		t.Fatalf("Failed to get user4 from database.")
 	}
 
 	directImportData := &DirectPostImportData{
@@ -2877,7 +2877,7 @@ func TestImportDirectPostWithAttachments(t *testing.T) {
 	testImage := filepath.Join(testsDir, "test.png")
 
 	// Create a user.
-	username := model.NewId()
+	username := "a" + model.NewId()
 	th.App.ImportUser(&UserImportData{
 		Username: &username,
 		Email:    ptrStr(model.NewId() + "@example.com"),
@@ -2887,7 +2887,7 @@ func TestImportDirectPostWithAttachments(t *testing.T) {
 		t.Fatalf("Failed to get user1 from database.")
 	}
 
-	username2 := model.NewId()
+	username2 := "a" + model.NewId()
 	th.App.ImportUser(&UserImportData{
 		Username: &username2,
 		Email:    ptrStr(model.NewId() + "@example.com"),
